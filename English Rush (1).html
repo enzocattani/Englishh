@@ -1,0 +1,763 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>English Rush</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Outfit:wght@400;600;800&display=swap">
+<style>
+/* Layout: single column arcade, thick buttons, hard shadows; color heat grows with the streak */
+:root{
+  --bg:#160a3c; --bg2:#24135e; --deep:#1a0a45; --ink:#fff6e6; --mute:#b7a6ff;
+  --pink:#ff3d9a; --cyan:#27e3ea; --yellow:#ffd22e; --lime:#7bff59; --red:#ff4a4a; --orange:#ff8a2e;
+  --display:"Bagel Fat One","Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;
+  --body:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --heat:0; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.35;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:20px 40px; min-height:100%; -webkit-tap-highlight-color:transparent;
+}
+.glow{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+   radial-gradient(70% 45% at 50% -5%, rgba(255,61,154,calc(.18 + var(--heat)*.5)), transparent 70%),
+   radial-gradient(60% 40% at 100% 100%, rgba(39,227,234,calc(.10 + var(--heat)*.3)), transparent 70%);
+  transition:background .4s}
+#app{position:relative;z-index:1;max-width:560px;margin:0 auto}
+section{display:flex;flex-direction:column;gap:16px}
+h1,h2,h3,.disp{font-family:var(--display);font-weight:400;margin:0}
+button{font-family:var(--body);cursor:pointer;color:inherit}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.btn{border:0;border-radius:18px;padding:14px 20px;font-weight:800;font-size:18px;color:var(--deep);
+  background:var(--yellow);box-shadow:0 6px 0 rgba(0,0,0,.4);transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(5px);box-shadow:0 1px 0 rgba(0,0,0,.4)}
+.btn.pink{background:var(--pink)} .btn.cyan{background:var(--cyan)} .btn.lime{background:var(--lime)}
+.ghost{border:2px solid rgba(255,255,255,.22);background:rgba(255,255,255,.06);border-radius:14px;
+  padding:8px 14px;font-weight:600;font-size:14px}
+
+/* HOME */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font-size:clamp(34px,10vw,48px);line-height:1;letter-spacing:.5px;text-shadow:3px 3px 0 var(--pink),6px 6px 0 var(--cyan)}
+.nota{background:var(--bg2);border:3px solid rgba(255,255,255,.12);border-radius:26px;padding:18px 20px;display:grid;gap:10px}
+.nota .lbl{font-size:13px;font-weight:800;letter-spacing:.14em;color:var(--mute)}
+.nota .row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.big{font-family:var(--display);font-size:clamp(72px,24vw,120px);line-height:.9;color:var(--nc,var(--yellow));text-shadow:4px 4px 0 rgba(0,0,0,.35)}
+.big small{font-size:.32em;color:var(--mute);text-shadow:none;margin-left:4px}
+.sub{color:var(--mute);font-size:14px;font-weight:600;text-align:right;max-width:46%}
+.xp{display:grid;gap:6px}
+.xp .t{display:flex;justify-content:space-between;font-weight:800;font-size:14px}
+.track{height:14px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
+.fill{height:100%;width:0;border-radius:99px;background:var(--lime);transition:width .5s cubic-bezier(.2,.9,.3,1.2)}
+.modes{display:grid;gap:14px}
+.mode{display:grid;grid-template-columns:84px 1fr;align-items:center;gap:6px;text-align:left;border:0;border-radius:24px;
+  padding:16px 18px 16px 12px;color:var(--deep);box-shadow:0 7px 0 rgba(0,0,0,.4);transition:transform .08s,box-shadow .08s}
+.mode:active{transform:translateY(6px);box-shadow:0 1px 0 rgba(0,0,0,.4)}
+.mode .g{font-family:var(--display);font-size:46px;text-align:center;line-height:1}
+.mode .n{font-family:var(--display);font-size:24px;line-height:1.1}
+.mode .d{font-size:14px;font-weight:600;opacity:.85;margin-top:2px}
+.mode.m1{background:var(--pink)} .mode.m2{background:var(--cyan)} .mode.m3{background:var(--yellow)}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mini div{background:rgba(255,255,255,.07);border-radius:16px;padding:10px 8px;text-align:center}
+.mini b{display:block;font-family:var(--display);font-weight:400;font-size:24px;color:var(--cyan)}
+.mini span{font-size:12px;font-weight:600;color:var(--mute)}
+.reset{align-self:center;background:none;border:0;color:var(--mute);text-decoration:underline;font-size:13px;padding:8px}
+
+/* GAME */
+.hud{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px}
+.hudmid{text-align:center;line-height:1.1}
+.hudmid .ml{font-weight:800;font-size:12px;letter-spacing:.16em;color:var(--mute)}
+.hudmid .pg{font-family:var(--display);font-size:22px}
+.right{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.score{font-family:var(--display);font-size:30px;line-height:1;color:var(--yellow);text-shadow:2px 2px 0 rgba(0,0,0,.35);font-variant-numeric:tabular-nums}
+.hearts{font-size:22px;letter-spacing:2px;color:var(--red);line-height:1}
+.hearts .lost{color:rgba(255,255,255,.2);transform:scale(.85);display:inline-block}
+.hearts .hit{animation:hit .5s}
+.timer{height:14px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
+.timer i{display:block;height:100%;width:100%;background:var(--cyan);transform-origin:left;transform:scaleX(1)}
+.timer.warn i{background:var(--yellow)} .timer.crit i{background:var(--red)}
+.chips{display:flex;gap:10px;align-items:center;min-height:38px}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:6px 12px;font-weight:800;font-size:15px;
+  background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.14);font-variant-numeric:tabular-nums}
+.chip svg{width:16px;height:16px;fill:var(--orange)}
+.chip.hot{background:var(--orange);color:var(--deep);border-color:transparent}
+.chip.hot svg{fill:var(--deep)}
+.chip.mult{background:var(--pink);color:#fff;border-color:transparent}
+.bump{animation:bump .3s}
+.card{background:var(--bg2);border:3px solid rgba(255,255,255,.12);border-radius:26px;padding:20px 20px 24px;display:grid;gap:12px}
+.tag{justify-self:start;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--deep);
+  background:var(--lime);border-radius:99px;padding:4px 10px}
+.card h2{font-size:clamp(22px,6.2vw,28px);line-height:1.2;text-wrap:balance;overflow-wrap:anywhere}
+.opts{display:grid;gap:12px}
+.opt{display:grid;grid-template-columns:38px minmax(0,1fr);align-items:center;gap:12px;text-align:left;border:0;border-radius:18px;
+  padding:12px 14px;min-height:62px;font-weight:600;font-size:17px;color:var(--deep);
+  box-shadow:0 6px 0 rgba(0,0,0,.4);transition:transform .08s,box-shadow .08s,opacity .2s,filter .2s}
+.opt .k{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:rgba(26,10,69,.2);font-family:var(--display);font-size:20px}
+.opt .t{overflow-wrap:anywhere}
+.opt:active:not(:disabled){transform:translateY(5px);box-shadow:0 1px 0 rgba(0,0,0,.4)}
+.opt.c0{background:var(--pink)} .opt.c1{background:var(--cyan)} .opt.c2{background:var(--yellow)} .opt.c3{background:var(--lime)}
+.opt:disabled{cursor:default}
+.opt.dim{opacity:.3;filter:saturate(.4)}
+.opt.good{background:var(--lime);outline:4px solid #fff;animation:pulse .5s}
+.opt.good .k{background:var(--deep);color:var(--lime)}
+.opt.bad{background:var(--red);color:#fff;animation:shake .45s}
+.opt.bad .k{background:rgba(0,0,0,.3)}
+.explain{background:var(--bg2);border:3px solid var(--red);border-radius:22px;padding:16px;display:grid;gap:12px;animation:rise .25s}
+.explain .r{font-weight:800}
+.explain .r b{color:var(--lime)}
+.explain p{margin:0;color:var(--mute);font-weight:600}
+.shake{animation:shake .4s}
+
+/* TEACHER TAB */
+.teacher{display:grid;gap:10px}
+.tbtn{justify-self:start;display:inline-flex;align-items:center;gap:8px;border:2px dashed rgba(255,255,255,.3);background:rgba(255,255,255,.05);
+  border-radius:14px;padding:8px 14px;font-weight:800;font-size:14px;letter-spacing:.04em;color:var(--mute)}
+.tbtn svg{width:16px;height:16px;fill:currentColor}
+.tbtn[aria-expanded="true"]{color:var(--ink);border-style:solid;border-color:var(--cyan)}
+.tbody{background:var(--bg2);border:3px solid var(--cyan);border-radius:20px;padding:14px;display:grid;gap:12px;animation:rise .2s}
+.tform{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px}
+.tform label{font-weight:800;font-size:14px;color:var(--mute)}
+.tform input{min-width:0;width:100%;font:800 22px var(--body);letter-spacing:.4em;text-align:center;color:var(--ink);background:var(--deep);
+  border:2px solid rgba(255,255,255,.25);border-radius:12px;padding:8px}
+.tform input:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+.tform .btn{padding:10px 16px;font-size:16px;box-shadow:0 4px 0 rgba(0,0,0,.4)}
+.tmsg{color:var(--red);font-weight:800;font-size:14px}
+.tans .r{font-weight:800;font-size:18px}
+.tans .r b{color:var(--lime)}
+.tans p{margin:6px 0 10px;color:var(--mute);font-weight:600}
+
+/* RESULT */
+.rhead{text-align:center;display:grid;gap:6px;justify-items:center}
+.rtitle{font-size:clamp(28px,8vw,40px);text-shadow:3px 3px 0 var(--pink)}
+.rbig{font-family:var(--display);font-size:clamp(84px,28vw,140px);line-height:.95;color:var(--nc,var(--yellow));text-shadow:5px 5px 0 rgba(0,0,0,.4)}
+.rbig small{font-size:.3em;color:var(--mute);text-shadow:none}
+.rec{display:inline-block;background:var(--yellow);color:var(--deep);font-weight:800;border-radius:99px;padding:5px 14px;animation:bump .6s}
+.grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.grid4 div{background:rgba(255,255,255,.07);border-radius:18px;padding:12px;text-align:center}
+.grid4 b{display:block;font-family:var(--display);font-weight:400;font-size:28px;color:var(--cyan)}
+.grid4 span{font-size:13px;font-weight:600;color:var(--mute)}
+.rev{display:grid;gap:8px;list-style:none;margin:0;padding:0}
+.rev li{background:rgba(255,255,255,.06);border-left:5px solid var(--red);border-radius:12px;padding:10px 12px;display:grid;gap:2px;overflow-wrap:anywhere}
+.rev li b{font-weight:600}
+.rev li span{color:var(--lime);font-weight:800}
+.h3{font-size:20px}
+.btns{display:grid;gap:12px}
+
+/* FX */
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+.flash{position:fixed;inset:0;pointer-events:none;z-index:40;opacity:0}
+.flash.ok{animation:fok .35s} .flash.bad{animation:fbad .45s}
+.pop{position:fixed;inset:0;display:grid;place-items:center;pointer-events:none;z-index:60;text-align:center;padding:20px;
+  font-family:var(--display);font-size:clamp(44px,15vw,96px);line-height:1;color:var(--yellow);text-shadow:5px 5px 0 var(--pink);opacity:0}
+.pop.go{animation:pop .95s cubic-bezier(.2,1.3,.4,1)}
+.fl{position:fixed;z-index:55;pointer-events:none;font-family:var(--display);font-size:30px;color:var(--lime);text-shadow:2px 2px 0 var(--deep);
+  transform:translate(-50%,-50%);animation:float .9s ease-out forwards}
+@keyframes pop{0%{opacity:0;transform:scale(.3) rotate(-8deg)}25%{opacity:1;transform:scale(1.15) rotate(3deg)}70%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.2)}}
+@keyframes float{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}20%{opacity:1;transform:translate(-50%,-70%) scale(1.2)}100%{opacity:0;transform:translate(-50%,-190%) scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+@keyframes pulse{0%{transform:scale(1)}40%{transform:scale(1.05)}100%{transform:scale(1)}}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+@keyframes hit{0%{transform:scale(1.6)}100%{transform:scale(.85)}}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fok{0%{opacity:.5;background:var(--lime)}100%{opacity:0;background:var(--lime)}}
+@keyframes fbad{0%{opacity:.5;background:var(--red)}100%{opacity:0;background:var(--red)}}
+@media (prefers-reduced-motion:reduce){
+  .opt.bad,.shake,.opt.good,.pop.go,.flash.ok,.flash.bad,.bump,.hearts .hit{animation:none!important}
+  .pop.go{opacity:1}
+  .fl{animation-duration:.01s!important}
+}
+</style>
+
+<div class="glow"></div>
+<canvas id="fx"></canvas>
+<div class="flash" id="flash"></div>
+<div class="pop" id="pop" aria-live="polite"></div>
+
+<main id="app">
+  <!-- HOME -->
+  <section id="home">
+    <div class="top">
+      <h1 class="logo">ENGLISH<br>RUSH</h1>
+      <button class="ghost" id="soundBtn" type="button" aria-pressed="true">Som: on</button>
+    </div>
+
+    <div class="nota">
+      <div class="lbl">NOTA GERAL</div>
+      <div class="row">
+        <div class="big"><span id="nota">–</span><small>/10</small></div>
+        <div class="sub" id="notaSub"></div>
+      </div>
+      <div class="xp">
+        <div class="t"><span id="lvl">Nível 1</span><span id="xpTxt">0 / 100 XP</span></div>
+        <div class="track"><div class="fill" id="xpFill"></div></div>
+      </div>
+    </div>
+
+    <div class="modes">
+      <button class="mode m1" type="button" data-mode="inf">
+        <span class="g">∞</span>
+        <span><span class="n">Infinito</span><br><span class="d">Sem tempo. Sem fim. Só combo.</span></span>
+      </button>
+      <button class="mode m2" type="button" data-mode="test">
+        <span class="g">20</span>
+        <span><span class="n">Teste</span><br><span class="d">20 questões, sem tempo. Nota de 0 a 10.</span></span>
+      </button>
+      <button class="mode m3" type="button" data-mode="turbo">
+        <span class="g">3♥</span>
+        <span><span class="n">Infinito Turbo</span><br><span class="d">10 segundos por questão. 3 vidas.</span></span>
+      </button>
+    </div>
+
+    <div class="mini">
+      <div><b id="sTest">–</b><span>Melhor teste</span></div>
+      <div><b id="sTurbo">0</b><span>Recorde turbo</span></div>
+      <div><b id="sStreak">0</b><span>Maior sequência</span></div>
+    </div>
+    <button class="reset" id="resetBtn" type="button">Zerar tudo</button>
+  </section>
+
+  <!-- GAME -->
+  <section id="game" hidden>
+    <div class="hud">
+      <button class="ghost" id="quit" type="button">Sair</button>
+      <div class="hudmid"><div class="ml" id="modeLbl"></div><div class="pg" id="prog"></div></div>
+      <div class="right">
+        <div class="score" id="score">0</div>
+        <div class="hearts" id="hearts" hidden></div>
+      </div>
+    </div>
+    <div class="timer" id="timer" hidden><i id="timerBar"></i></div>
+    <div class="chips">
+      <span class="chip" id="streakChip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z"/></svg><span id="streak">0</span></span>
+      <span class="chip mult" id="mult">x1</span>
+    </div>
+    <div class="card" id="qcard">
+      <span class="tag" id="tag"></span>
+      <h2 id="qtext"></h2>
+    </div>
+    <div class="teacher" id="teacher">
+      <button class="tbtn" id="tToggle" type="button" aria-expanded="false" aria-controls="tBody">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V8a5 5 0 0 1 10 0v2h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1zm2 0h6V8a3 3 0 0 0-6 0v2z"/></svg>
+        <span id="tLabel">Professor</span>
+      </button>
+      <div class="tbody" id="tBody" hidden>
+        <form class="tform" id="tForm" autocomplete="off">
+          <label for="tPin">Senha</label>
+          <input id="tPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="••••">
+          <button class="btn" type="submit">Abrir</button>
+        </form>
+        <div class="tmsg" id="tMsg" hidden>Senha incorreta.</div>
+        <div class="tans" id="tAns" hidden>
+          <div class="r">Resposta certa: <b id="tR"></b></div>
+          <p id="tE"></p>
+          <button class="ghost" id="tLock" type="button">Trancar</button>
+        </div>
+      </div>
+    </div>
+    <div class="opts" id="opts"></div>
+    <div class="explain" id="explain" hidden>
+      <div class="r" id="expR"></div>
+      <p id="expP"></p>
+      <button class="btn" id="nextBtn" type="button">Continuar</button>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result" hidden>
+    <div class="rhead">
+      <h2 class="rtitle" id="rTitle"></h2>
+      <div class="rbig"><span id="rNum">0</span><small id="rUnit"></small></div>
+      <div id="rRec"></div>
+    </div>
+    <div class="grid4">
+      <div><b id="rA">0</b><span>Acertos</span></div>
+      <div><b id="rS">0</b><span>Maior sequência</span></div>
+      <div><b id="rP">0</b><span>Pontos</span></div>
+      <div><b id="rG">–</b><span>Nota geral agora</span></div>
+    </div>
+    <div id="revWrap" hidden>
+      <h3 class="h3" style="margin-bottom:8px">Para revisar</h3>
+      <ul class="rev" id="rev"></ul>
+    </div>
+    <div class="btns">
+      <button class="btn pink" id="again" type="button">Jogar de novo</button>
+      <button class="btn cyan" id="toHome" type="button">Início</button>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id)};
+var RM=false; try{RM=window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
+
+/* ---------- QUESTION BANK: [tag, question, right, [3 wrong], explanation?] ---------- */
+var BANK=[
+['Lugares','Where do you go to watch a movie?','movie theater',['zoo','market','museum']],
+['Lugares','You can see lions and elephants at the ___.','zoo',['museum','stadium','bus station']],
+['Lugares','You must not touch the pictures in an art ___.','museum',['market','park','street']],
+['Lugares','Be careful of the traffic when you ride your bike in the ___.','street',['zoo','museum','stadium']],
+['Lugares','Fans go to the ___ to watch a soccer game.','stadium',['market','subway','square']],
+['Lugares','You can buy fruit and vegetables at the ___.','market',['museum','movie theater','bus station']],
+['Lugares','British English for “movie theater” is…','cinema',['shopping centre','the Tube','city centre']],
+['Lugares','British English for “the subway” is…','the underground / the Tube',['shopping centre','cinema','city centre']],
+['Lugares','British English for “mall” is…','shopping centre',['city centre','cinema','the Tube']],
+['Lugares','American English for “city centre” is…','city center',['mall','the metro','movie theater']],
+['Lugares','Don\'t leave food on the grass after a picnic in the ___.','park',['subway','museum','zoo']],
+['Lugares','I don\'t like traveling on the ___. I prefer the bus.','subway',['park','square','zoo']],
+['Lugares','Buses leave from the bus ___.','station',['square','market','stadium']],
+['Lugares','I like to go to the café on the ___. They make a great omelet.','square',['subway','stadium','zoo']],
+['Natureza','A very large area of salt water is an ___.','ocean',['island','lake','river']],
+['Natureza','Many trees together make a ___.','forest',['farm','village','lake']],
+['Natureza','Land with water all around it is an ___.','island',['mountain','village','river']],
+['Natureza','A small town in the country is a ___.','village',['ocean','forest','lake']],
+['Natureza','Cows and horses live on a ___.','farm',['lake','island','ocean']],
+['Natureza','Water that flows to the ocean is a ___.','river',['farm','mountain','forest']],
+['Natureza','A very high place with snow on top is a ___.','mountain',['village','lake','farm']],
+['Natureza','A big area of water with land around it is a ___.','lake',['ocean','island','mountain']],
+['Natureza','British English: “ocean | ___”','sea',['lake','river','coach']],
+['Was/Were','There ___ a high school fifty years ago.','was',['were','is','are'],'Singular (a high school) pede “there was”.'],
+['Was/Were','There ___ two museums fifty years ago.','were',['was','is','be'],'Plural (two museums) pede “there were”.'],
+['Was/Were','There ___ school computers fifty years ago.','weren\'t',['wasn\'t','isn\'t','aren\'t'],'Plural negativo: “there weren\'t”.'],
+['Was/Were','You ___ a student fifty years ago.','were',['was','are','is'],'Com “you”, o passado de be é “were”.'],
+['Was/Were','We use a ___ before “ago”.','period of time',['start date','singular noun','question word'],'Ex.: three years ago, one hour ago.'],
+['Was/Were','“Was” is the past of…','am and is',['are','have','go']],
+['Was/Were','“Were” is the past of…','are',['am','is','have']],
+['Was/Were','She is at the bus station. (one hour ago)','She was at the bus station one hour ago.',['She were at the bus station one hour ago.','She is at the bus station one hour ago.','She was at the bus station one hour.']],
+['Was/Were','I am a student. (three years ago)','I was a student three years ago.',['I were a student three years ago.','I am a student three years ago.','I was a student three years.']],
+['Was/Were','We are on vacation in Mexico. (last summer)','We were on vacation in Mexico last summer.',['We was on vacation in Mexico last summer.','We are on vacation in Mexico last summer.','We were on vacation in Mexico ago.']],
+['Was/Were','There isn\'t a zoo in the town. (ten years ago)','There wasn\'t a zoo in the town ten years ago.',['There weren\'t a zoo in the town ten years ago.','There isn\'t a zoo in the town ten years ago.','There wasn\'t a zoo in the town ten years.']],
+['Was/Were','You are at my birthday party. (one week ago)','You were at my birthday party one week ago.',['You was at my birthday party one week ago.','You are at my birthday party one week ago.','You were at my birthday party one week.']],
+['Was/Were','Which sentence is correct?','There were two museums fifty years ago.',['There was two museums fifty years ago.','There is two museums fifty years ago.','There be two museums fifty years ago.']],
+['Leitura','In 1824, how many people lived in Singapore?','10,683',['100,000','55,000','13 million']],
+['Leitura','Today, most Singaporeans live…','in apartments in tall buildings',['in houses with three floors','on boats','in old streets']],
+['Leitura','How tall are the Singapore “supertrees”?','50 meters',['10 meters','100 meters','18 meters']],
+['Leitura','How many Venetians were there in Venice in 1500?','100,000',['10,683','55,000','13 million']],
+['Leitura','What is the population of Venice now?','55,000',['100,000','10,683','13 million']],
+['Leitura','How many tourists visit Venice every year?','13 million',['55,000','100,000','10,683']],
+['Leitura','In which city are there wooden boats on the canals between the buildings?','Venice',['Singapore','Tokyo','Berlin']],
+['Leitura','Why do young people leave Venice?','There aren\'t many jobs or places to study.',['It is too modern.','There are no tourists.','The houses are three floors high.']],
+['Conversa','Words like “Wow” and “I see” show that you are…','interested in what they say',['angry with them','bored','afraid']],
+['Passado','Past of “have”','had',['haved','has','haves']],
+['Passado','Past of “see”','saw',['seed','seen','sees']],
+['Passado','Past of “go”','went',['goed','gone','go']],
+['Passado','Past of “eat”','ate',['eated','eat','eaten']],
+['Passado','I ___ my vacation in the city! (love)','loved',['love','loves','loving']],
+['Passado','For most verbs we add ___ to the base verb in the simple past.','-ed',['-ing','-s','did']],
+['Passado','I didn\'t ___ tired.','feel',['felt','feeling','feels'],'Depois de didn\'t, o verbo fica na forma base.'],
+['Passado','She didn\'t ___ early.','wake up',['woke up','wakes up','waked up'],'Depois de didn\'t, o verbo fica na forma base.'],
+['Passado','We ___ to great music at night.','listened',['listen','listens','listening']],
+['Passado','I ___ every day and went to a lot of museums.','shopped',['shop','shops','shopping']],
+['Passado','They ___ hiking on Sunday.','went',['go','goed','goes'],'“Go” é irregular: go → went.'],
+['Passado','They ___ see their favorite player.','didn\'t',['don\'t','weren\'t','wasn\'t'],'Negativo do passado com verbo comum: didn\'t + verbo base.'],
+['Passado','She ___ a terrible day yesterday.','had',['has','have','haved']],
+['Passado','I ___ fish every day in Portugal.','ate',['eat','eated','eats']],
+['Passado','We use didn\'t before the ___ form of the verb.','base',['past','-ing','plural']],
+['Passado','Irregular verbs are ___ in the past.','different',['the same as the base','always -ed','never used']],
+['Passado','I ___ at my uncle\'s house. (stay)','stayed',['stay','stays','staying']],
+['Passado','I ___ some great pictures in the art museum. (see)','saw',['see','seen','seed']],
+['Perguntas','Where ___ you stay?','did',['do','are','was'],'Pergunta no passado: wh- + did + sujeito + verbo base.'],
+['Perguntas','What food ___ they eat?','did',['do','were','was'],'Pergunta no passado: wh- + did + sujeito + verbo base.'],
+['Perguntas','Where ___ they? (be)','were',['did','was','are'],'Com be, não usamos did: where were they?'],
+['Perguntas','Who ___ they invite?','did',['were','was','do']],
+['Perguntas','Which question is correct?','Where did you stay?',['Where you stayed?','Where did you stayed?','Where stayed you?']],
+['Perguntas','Put in order: home? / Where / your / was / first','Where was your first home?',['Where your first was home?','Where was first your home?','Was where your first home?']],
+['Perguntas','Put in order: learn / ride / to / a bicycle? / When / you / did','When did you learn to ride a bicycle?',['When you did learn to ride a bicycle?','When did learn you to ride a bicycle?','Did when you learn to ride a bicycle?']],
+['Perguntas','Put in order: TV show / What / favorite / was / your / as a child?','What was your favorite TV show as a child?',['What your favorite was TV show as a child?','What was TV show your favorite as a child?','Was what your favorite TV show as a child?']],
+['Perguntas','How ___ you feel on your first day of school?','did',['do','were','was']],
+['Perguntas','What movie ___ you see last week?','did',['do','were','was']],
+['Perguntas','___ you worried about the weather?','Were',['Did','Was','Do'],'Pergunta com be: was/were vem antes do sujeito.'],
+['Perguntas','___ you make new friends on your trip?','Did',['Were','Was','Are']],
+['Perguntas','Did you ___ a lot of bags?','take',['took','taking','takes'],'Depois de did, o verbo fica na forma base.'],
+['Perguntas','Were you ready to come home? Or did you ___ to stay longer?','want',['wanted','wants','wanting']],
+['Perguntas','In “Did you stay?”, the main verb “stay” is…','in the base form',['in the past form','with -ed','with -ing']],
+['Perguntas','Which question is correct?','Did you stay in hotels?',['Do you stayed in hotels?','Did you stayed in hotels?','You did stay in hotels?']],
+['Perguntas','Put in order: sleep / tent? / in the / dog / the / Did','Did the dog sleep in the tent?',['Did the dog slept in the tent?','The dog did sleep in the tent?','Did sleep the dog in the tent?']],
+['Perguntas','Put in order: night? / Were / at / cold / they','Were they cold at night?',['Did they cold at night?','Were cold they at night?','They were cold at night?']],
+['Viagens','go ___ the airport','to',['on','at','in']],
+['Viagens','get / take ___','a train',['on foot','your luggage','a hotel']],
+['Viagens','buy ___','a ticket',['a hotel','on foot','your luggage']],
+['Viagens','stay at ___','a hotel',['a plane','a ticket','a bus']],
+['Viagens','go ___ foot','on',['at','by','to']],
+['Viagens','carry ___','your luggage',['a plane','a hotel','a tour']],
+['Viagens','Mark took a ___ to Ireland across the Irish Sea.','boat',['bus','hotel','tour']],
+['Viagens','When you visit Peru, you should take a ___ of Machu Picchu.','tour',['plane','hotel','luggage']],
+['Viagens','What\'s the quickest way from London to Cambridge? You should get the ___.','train',['foot','hotel','luggage']],
+['Viagens','British English for a long-distance bus is a…','coach',['tube','tram','plane']],
+['Viagens','Maria went to the airport and took a ___ to Brasília.','plane',['hotel','tour','foot']],
+['Viagens','You don\'t need to go to the station. You can buy a ___ online.','ticket',['foot','hotel','coach']],
+['Viagens','For their summer vacation they often ___ at the Milton Hotel.','stay',['go','carry','take']],
+['Sentimentos','The baby is ___. She wants to go to sleep.','tired',['angry','excited','afraid']],
+['Sentimentos','The team is ___. They won the game!','excited',['bored','worried','tired']],
+['Sentimentos','Jane is ___. She forgot to do her homework.','worried',['happy','hungry','excited']],
+['Sentimentos','George is ___. He didn\'t have time to eat breakfast.','hungry',['tired','angry','bored']],
+['Sentimentos','Jack is ___. Let\'s ask him to play a game with us.','bored',['afraid','excited','angry']],
+['Sentimentos','Maddy is ___ at her sister because she used her phone without asking.','angry',['happy','hungry','tired']],
+['Sentimentos','Lindsey is ___. She\'s with all her friends.','happy',['angry','afraid','bored']],
+['Sentimentos','The little cat is ___ of the big dog.','afraid',['happy','hungry','excited']],
+['Leitura','Where did Marina go on her last trip?','Jordan',['Brazil','Peru','Ireland']],
+['Leitura','How many days did Marina hike?','ten',['two','twelve','nine']],
+['Leitura','Why didn\'t Marina carry her luggage?','They took a tour.',['She was tired.','She didn\'t have bags.','The plane lost it.']],
+['Leitura','What was the best thing about Marina\'s trip?','Seeing camels in the desert',['The chicken','The hotel','The museum']],
+['Leitura','How old is Marina\'s little brother?','nine',['thirteen','twelve','ten']],
+['Leitura','How many kilometers a day did Marina\'s group walk?','12',['120','10','9']],
+['Leitura','How did Marina travel to Jordan?','By plane, then bus, then on foot',['By boat only','By train and bike','By car only']],
+['Conversa','I forgot your sister\'s name! I\'m ___ sorry.','so',['too','very much','not']],
+['Conversa','Someone says “I\'m so sorry.” A good answer is…','That\'s all right.',['Guess what happened?','I wanted to surprise her.','Wow, the subway!']],
+['Conversa','“___ a problem.” (it\'s fine)','Not',['No','Never','Don\'t']],
+['Conversa','“Well, ___ mind.”','never',['not','no','don\'t']],
+['Conversa','“Oh, ___. I forgot.”','sorry',['problem','guess','terrible']],
+['Conversa','An anecdote is…','a true, funny story',['a secret','an apology','a question']],
+['Conversa','“___ what happened?” (starting an anecdote)','Guess',['Think','Know','Say']],
+['Conversa','“So ___ I took a bus back home.”','then',['did','really','sorry']],
+['Conversa','“What ___ you do?” (asking about the next step)','did',['do','was','were']],
+['Conversa','“That ___ terrible!” (reacting to a story)','sounds',['sound','is sound','sounding']],
+['Conversa','“I wanted to surprise my friend on her ___.”','birthday',['luggage','ticket','vacation']]
+];
+
+/* ---------- STATE / STORAGE ---------- */
+var KEY='englishRush.v1';
+function defStats(){return {xp:0,total:0,correct:0,bestStreak:0,sound:true,inf:{plays:0,best:0},test:{plays:0,best:null,last:null},turbo:{plays:0,best:0}}}
+function load(){
+  var d=defStats();
+  try{
+    var r=localStorage.getItem(KEY);
+    if(r){var o=JSON.parse(r);
+      for(var k in d){ if(o[k]!==undefined){ d[k]=(typeof d[k]==='object'&&d[k])?Object.assign({},d[k],o[k]):o[k]; } }
+    }
+  }catch(e){}
+  return d;
+}
+var S=load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function fmt(n){return n.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})}
+function levelInfo(xp){var lvl=1,need=100;while(xp>=need){xp-=need;lvl++;need+=50}return {lvl:lvl,into:xp,need:need}}
+function notaColor(n){return n>=9?'var(--lime)':n>=7?'var(--cyan)':n>=5?'var(--yellow)':'var(--red)'}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function show(id){if(id!=='game')tUnlocked=false;['home','game','result'].forEach(function(s){$(s).hidden=(s!==id)});window.scrollTo(0,0)}
+
+/* ---------- AUDIO ---------- */
+var ac=null;
+function ensureAudio(){
+  try{
+    if(!ac){var C=window.AudioContext||window.webkitAudioContext;if(C)ac=new C()}
+    if(ac&&ac.state==='suspended')ac.resume();
+  }catch(e){ac=null}
+}
+function tone(f,t0,d,type,g,f2){
+  if(!ac||!S.sound)return;
+  try{
+    var o=ac.createOscillator(),v=ac.createGain(),t=ac.currentTime+t0;
+    o.type=type||'sine';o.frequency.setValueAtTime(f,t);
+    if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
+    v.gain.setValueAtTime(0.0001,t);v.gain.exponentialRampToValueAtTime(g||0.15,t+0.015);v.gain.exponentialRampToValueAtTime(0.0001,t+d);
+    o.connect(v);v.connect(ac.destination);o.start(t);o.stop(t+d+0.02);
+  }catch(e){}
+}
+var STEPS=[0,2,4,7,9,12,14,16,19,21,24,26,28];
+function nf(step){return 523.25*Math.pow(2,step/12)}
+var sfx={
+  ok:function(st){var s=STEPS[Math.min(st,STEPS.length-1)];tone(nf(s),0,.12,'triangle',.18);tone(nf(s+4),.07,.16,'triangle',.16);tone(nf(s+7),.14,.22,'sine',.12)},
+  bad:function(){tone(220,0,.35,'sawtooth',.14,70);tone(110,.05,.3,'square',.08,55)},
+  tick:function(){tone(1000,0,.06,'square',.06)},
+  level:function(){[0,4,7,12,16,19,24].forEach(function(s,i){tone(nf(s),i*.07,.2,'triangle',.16)})},
+  win:function(){[0,4,7,12].forEach(function(s,i){tone(nf(s),i*.1,.25,'triangle',.17)});tone(nf(16),.45,.5,'triangle',.18)},
+  over:function(){[7,4,0,-5].forEach(function(s,i){tone(nf(s),i*.15,.3,'sawtooth',.1)})},
+  start:function(){tone(nf(0),0,.08,'square',.08);tone(nf(7),.08,.14,'square',.08)}
+};
+function buzz(ms){try{if(navigator.vibrate)navigator.vibrate(ms)}catch(e){}}
+
+/* ---------- CONFETTI ---------- */
+var cv=$('fx'),cx=cv.getContext('2d'),parts=[],raf=0,W=0,H=0,DPR=1;
+function sizeCanvas(){DPR=Math.min(window.devicePixelRatio||1,2);W=window.innerWidth;H=window.innerHeight;cv.width=W*DPR;cv.height=H*DPR;cx.setTransform(DPR,0,0,DPR,0,0)}
+sizeCanvas();window.addEventListener('resize',sizeCanvas);
+var COLORS=['#ff3d9a','#27e3ea','#ffd22e','#7bff59','#ff8a2e','#ffffff'];
+function burst(x,y,n,spread,power){
+  if(RM)n=Math.ceil(n/4);
+  for(var i=0;i<n;i++){
+    var a=(Math.random()*spread)-spread/2-Math.PI/2,s=(Math.random()*.6+.5)*(power||11);
+    parts.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,r:Math.random()*6.28,vr:(Math.random()-.5)*.4,w:6+Math.random()*7,h:4+Math.random()*6,c:COLORS[Math.floor(Math.random()*COLORS.length)],life:70+Math.random()*50});
+  }
+  if(!raf)raf=requestAnimationFrame(tick);
+}
+function rain(n){
+  if(RM)n=Math.ceil(n/4);
+  for(var i=0;i<n;i++){parts.push({x:Math.random()*W,y:-20-Math.random()*H*.4,vx:(Math.random()-.5)*3,vy:2+Math.random()*4,r:Math.random()*6.28,vr:(Math.random()-.5)*.3,w:7+Math.random()*7,h:5+Math.random()*6,c:COLORS[Math.floor(Math.random()*COLORS.length)],life:140+Math.random()*80})}
+  if(!raf)raf=requestAnimationFrame(tick);
+}
+function tick(){
+  cx.clearRect(0,0,W,H);
+  for(var i=parts.length-1;i>=0;i--){
+    var p=parts[i];p.vy+=.35;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.life--;
+    if(p.life<=0||p.y>H+30){parts.splice(i,1);continue}
+    cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.globalAlpha=Math.min(1,p.life/30);cx.fillStyle=p.c;cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);cx.restore();
+  }
+  if(parts.length){raf=requestAnimationFrame(tick)}else{raf=0;cx.clearRect(0,0,W,H)}
+}
+
+/* ---------- JUICE HELPERS ---------- */
+var popT=0;
+function pop(text,color){
+  var el=$('pop');el.textContent=text;el.style.color=color||'';el.classList.remove('go');void el.offsetWidth;el.classList.add('go');
+  clearTimeout(popT);popT=setTimeout(function(){el.classList.remove('go')},1000);
+}
+function flash(kind){var f=$('flash');f.className='flash';void f.offsetWidth;f.className='flash '+kind}
+function floater(txt,x,y){var d=document.createElement('div');d.className='fl';d.textContent=txt;d.style.left=x+'px';d.style.top=y+'px';document.body.appendChild(d);setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d)},950)}
+function bumpEl(el){el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump')}
+function countUp(el,to,dec,ms){
+  var t0=performance.now();
+  function f(t){var k=Math.min(1,(t-t0)/ms),e=1-Math.pow(1-k,3),v=to*e;el.textContent=dec?fmt(v):String(Math.round(v));if(k<1)requestAnimationFrame(f)}
+  if(RM){el.textContent=dec?fmt(to):String(to)}else requestAnimationFrame(f);
+}
+
+/* ---------- HOME ---------- */
+function renderHome(){
+  document.documentElement.style.setProperty('--heat','0');
+  var has=S.total>0,nota=has?S.correct/S.total*10:null;
+  $('nota').textContent=has?fmt(nota):'–';
+  $('nota').parentNode.style.setProperty('--nc',has?notaColor(nota):'var(--mute)');
+  $('notaSub').textContent=has?(S.correct+' acertos em '+S.total+' respostas'):'Responda para ganhar sua nota';
+  var li=levelInfo(S.xp);
+  $('lvl').textContent='Nível '+li.lvl;$('xpTxt').textContent=li.into+' / '+li.need+' XP';
+  $('xpFill').style.width=Math.round(li.into/li.need*100)+'%';
+  $('sTest').textContent=S.test.best==null?'–':fmt(S.test.best);
+  $('sTurbo').textContent=String(S.turbo.best);
+  $('sStreak').textContent=String(S.bestStreak);
+  $('soundBtn').textContent='Som: '+(S.sound?'on':'off');$('soundBtn').setAttribute('aria-pressed',S.sound?'true':'false');
+}
+
+/* ---------- GAME ---------- */
+var TEACHER_PIN='0000';
+var tUnlocked=false,tOpen=false,paused=false;
+var TAG_NOTE={
+  'Lugares':'Vocabulário de lugares da cidade (unidade 8). Atenção às diferenças entre inglês americano e britânico.',
+  'Natureza':'Vocabulário de natureza e campo (unidade 8).',
+  'Was/Were':'Passado de be: was (I, he, she, it, there + singular) e were (you, we, they, there + plural). Depois de “ago” vem um período de tempo.',
+  'Leitura':'Informação tirada dos textos de leitura do livro.',
+  'Passado':'Simple past: verbos regulares ganham -ed; irregulares mudam de forma. Em negativas e perguntas usamos didn\'t/did + verbo na forma base.',
+  'Perguntas':'Perguntas no passado: com be, was/were vem antes do sujeito; com os outros verbos, did + sujeito + verbo na forma base.',
+  'Viagens':'Vocabulário de viagens e transportes (unidade 9).',
+  'Sentimentos':'Adjetivos de sentimento (unidade 9).',
+  'Conversa':'Expressões úteis de conversa: pedir desculpas e contar uma anedota.'
+};
+function renderTeacher(){
+  $('tBody').hidden=!tOpen;
+  $('tToggle').setAttribute('aria-expanded',tOpen?'true':'false');
+  $('tForm').hidden=tUnlocked;$('tAns').hidden=!tUnlocked;
+  $('tLabel').textContent=tUnlocked?'Professor · destravado':'Professor';
+  if(!tUnlocked){$('tMsg').hidden=true}
+  if(tUnlocked&&cur){$('tR').textContent=cur[2];$('tE').textContent=cur[4]||TAG_NOTE[cur[0]]||''}
+}
+function pauseTimer(){if(mode==='turbo'&&!locked&&!paused){clearInterval(timer);paused=true}}
+function resumeTimer(){
+  if(!paused)return;paused=false;
+  if(!locked&&mode==='turbo'){tStart=performance.now()-(TIME-tLeft)*1000;runTimer()}
+}
+$('tToggle').addEventListener('click',function(){
+  tOpen=!tOpen;renderTeacher();
+  if(tOpen){pauseTimer();if(!tUnlocked){setTimeout(function(){try{$('tPin').focus()}catch(e){}},30)}}else{resumeTimer()}
+});
+$('tForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  var pin=$('tPin');
+  if(pin.value===TEACHER_PIN){tUnlocked=true;pin.value='';renderTeacher()}
+  else{
+    $('tMsg').hidden=false;pin.value='';
+    var b=$('tBody');b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');
+    try{pin.focus()}catch(x){}
+  }
+});
+$('tLock').addEventListener('click',function(){tUnlocked=false;renderTeacher()});
+
+var TIME=10,TEST_N=20;
+var mode='',deck=[],lastIdx=-1,cur=null,opts=[],qn=0,score=0,streak=0,bestRun=0,answered=0,right=0,lives=3,missed=[],locked=true,waitNext=false,autoT=0,timer=0,tStart=0,tLeft=TIME,lastTick=0,xpGain=0,lvStart=1,quitT=0;
+var MODE_LBL={inf:'INFINITO',test:'TESTE 20',turbo:'TURBO'};
+
+function start(m){
+  ensureAudio();sfx.start();
+  mode=m;deck=[];lastIdx=-1;qn=0;score=0;streak=0;bestRun=0;answered=0;right=0;lives=3;missed=[];xpGain=0;locked=true;waitNext=false;
+  lvStart=levelInfo(S.xp).lvl;
+  var all=BANK.map(function(_,i){return i});
+  deck=shuffle(all);if(m==='test')deck=deck.slice(0,TEST_N);
+  $('modeLbl').textContent=MODE_LBL[m];
+  $('hearts').hidden=(m!=='turbo');$('timer').hidden=(m!=='turbo');
+  $('quit').textContent=m==='inf'?'Encerrar':'Sair';
+  updateHud(true);show('game');nextQ();
+}
+function drawHearts(hitIdx){
+  var h='';for(var i=0;i<3;i++){h+='<span class="'+(i<lives?'':'lost')+(i===hitIdx?' hit':'')+'">♥</span>'}
+  $('hearts').innerHTML=h;
+}
+function updateHud(init){
+  $('score').textContent=String(score);
+  $('streak').textContent=String(streak);
+  var m=1+Math.min(4,Math.floor(streak/3));
+  $('mult').textContent='x'+m;
+  $('streakChip').classList.toggle('hot',streak>=3);
+  document.documentElement.style.setProperty('--heat',String(Math.min(streak,15)/15));
+  $('prog').textContent=mode==='test'?(Math.min(qn,TEST_N)+'/'+TEST_N):('Q '+qn);
+  if(mode==='turbo')drawHearts(-1);
+}
+function nextQ(){
+  clearTimeout(autoT);waitNext=false;
+  $('explain').hidden=true;
+  tOpen=false;paused=false;
+  if(mode==='test'&&qn>=TEST_N){finish();return}
+  if(!deck.length){deck=shuffle(BANK.map(function(_,i){return i}));if(deck[deck.length-1]===lastIdx&&deck.length>1){var t=deck[0];deck[0]=deck[deck.length-1];deck[deck.length-1]=t}}
+  lastIdx=deck.pop();cur=BANK[lastIdx];qn++;
+  opts=[{t:cur[2],ok:true}].concat(cur[3].map(function(w){return {t:w,ok:false}}));opts=shuffle(opts);
+  $('tag').textContent=cur[0];$('qtext').textContent=cur[1];
+  var box=$('opts');box.innerHTML='';
+  opts.forEach(function(o,i){
+    var b=document.createElement('button');b.type='button';b.className='opt c'+i;b.dataset.i=String(i);
+    var k=document.createElement('span');k.className='k';k.textContent='ABCD'.charAt(i);
+    var t=document.createElement('span');t.className='t';t.textContent=o.t;
+    b.appendChild(k);b.appendChild(t);b.addEventListener('click',function(){answer(i)});box.appendChild(b);
+  });
+  locked=false;updateHud();renderTeacher();
+  if(mode==='turbo')startTimer();
+}
+function drawTimer(){
+  var r=tLeft/TIME;$('timerBar').style.transform='scaleX('+r+')';
+  var t=$('timer');t.classList.toggle('warn',r<=.5&&r>.25);t.classList.toggle('crit',r<=.25);
+}
+function startTimer(){
+  clearInterval(timer);tLeft=TIME;lastTick=0;tStart=performance.now();drawTimer();
+  runTimer();
+}
+function runTimer(){
+  clearInterval(timer);
+  timer=setInterval(function(){
+    var el=(performance.now()-tStart)/1000;tLeft=Math.max(0,TIME-el);drawTimer();
+    var c=Math.ceil(tLeft);
+    if(tLeft<=3&&tLeft>0&&c!==lastTick){lastTick=c;sfx.tick()}
+    if(tLeft<=0){clearInterval(timer);answer(-1)}
+  },50);
+}
+function answer(i){
+  if(locked)return;locked=true;clearInterval(timer);
+  var kids=$('opts').children,ok=(i>=0&&opts[i].ok),btn=i>=0?kids[i]:null;
+  answered++;S.total++;
+  for(var n=0;n<kids.length;n++){kids[n].disabled=true;if(opts[n].ok)kids[n].classList.add('good');else if(n===i)kids[n].classList.add('bad');else kids[n].classList.add('dim')}
+  var rect=(btn||$('qcard')).getBoundingClientRect(),cx0=rect.left+rect.width/2,cy0=rect.top+rect.height/2;
+  var lvBefore=levelInfo(S.xp).lvl;
+  if(ok){
+    right++;S.correct++;streak++;if(streak>bestRun)bestRun=streak;if(streak>S.bestStreak)S.bestStreak=streak;
+    var mult=1+Math.min(4,Math.floor(streak/3)),pts=100*mult+(mode==='turbo'?Math.round(tLeft/TIME*50):0);
+    score+=pts;var gain=10*mult;S.xp+=gain;xpGain+=gain;
+    sfx.ok(streak-1);flash('ok');buzz(15);
+    floater('+'+pts,cx0,cy0);burst(cx0,cy0,24+Math.min(streak,12)*3,Math.PI*1.4,11+Math.min(streak,10));
+    var lvAfter=levelInfo(S.xp).lvl;
+    if(lvAfter>lvBefore){setTimeout(function(){pop('NÍVEL '+lvAfter+'!','var(--cyan)');sfx.level();rain(90)},180)}
+    else{
+      var M={3:'BOA!',5:'EM CHAMAS!',8:'IMPARÁVEL!',10:'DEZ SEGUIDAS!',15:'LENDÁRIO!',20:'INSANO!'};
+      if(M[streak]||(streak>20&&streak%5===0)){pop(M[streak]||'INSANO!',streak>=10?'var(--lime)':'var(--yellow)');burst(W/2,H*.45,70,Math.PI*2,14)}
+    }
+    bumpEl($('streakChip'));bumpEl($('mult'));
+  }else{
+    streak=0;S.xp+=2;xpGain+=2;
+    sfx.bad();flash('bad');buzz(60);
+    $('game').classList.remove('shake');void $('game').offsetWidth;$('game').classList.add('shake');
+    missed.push({q:cur[1],a:cur[2]});
+    if(mode==='turbo'){lives--;drawHearts(lives)}
+    if(i<0)pop('TEMPO!','var(--red)');
+  }
+  save();updateHud();$('score').classList.remove('bump');bumpEl($('score'));
+  var over=(mode==='test'&&answered>=TEST_N)||(mode==='turbo'&&lives<=0);
+  if(ok){
+    waitNext=true;autoT=setTimeout(function(){if(waitNext)goNext()},over?1100:950);
+  }else{
+    $('expR').innerHTML='';
+    var lead=document.createElement('span');lead.textContent=(i<0?'Tempo esgotado. ':'')+'Resposta certa: ';
+    var bb=document.createElement('b');bb.textContent=cur[2];$('expR').appendChild(lead);$('expR').appendChild(bb);
+    $('expP').textContent=cur[4]||'';$('expP').hidden=!cur[4];
+    $('nextBtn').textContent=over?'Ver resultado':'Continuar';
+    $('explain').hidden=false;waitNext=true;
+    setTimeout(function(){try{$('explain').scrollIntoView({block:'nearest',behavior:RM?'auto':'smooth'})}catch(e){}},60);
+  }
+}
+function goNext(){
+  if(!waitNext)return;waitNext=false;clearTimeout(autoT);
+  if((mode==='test'&&answered>=TEST_N)||(mode==='turbo'&&lives<=0)){finish();return}
+  nextQ();
+}
+$('nextBtn').addEventListener('click',goNext);
+
+/* ---------- FINISH ---------- */
+function finish(){
+  clearInterval(timer);clearTimeout(autoT);waitNext=false;locked=true;
+  var nota=answered?right/answered*10:null,rec=false;
+  if(mode==='inf'){S.inf.plays++;if(score>S.inf.best){rec=S.inf.best>0;S.inf.best=score}}
+  if(mode==='test'){S.test.plays++;S.test.last=nota;if(S.test.best==null||nota>S.test.best){rec=S.test.best!=null;S.test.best=nota}}
+  if(mode==='turbo'){S.turbo.plays++;if(score>S.turbo.best){rec=S.turbo.best>0;S.turbo.best=score}}
+  save();
+  var title,big,unit='',dec=false,col='var(--yellow)';
+  if(mode==='test'){
+    big=nota;dec=true;unit='/10';col=notaColor(nota);
+    title=nota>=10?'PERFEITO!':nota>=9?'QUASE PERFEITO!':nota>=7?'MANDOU BEM!':nota>=5?'DÁ PRA SUBIR!':'BORA DE NOVO!';
+  }else{
+    big=score;unit=' pts';
+    title=mode==='turbo'?(lives<=0?'ACABARAM AS VIDAS':'FIM DO TURBO'):'SESSÃO ENCERRADA';
+  }
+  $('rTitle').textContent=title;$('rUnit').textContent=unit;
+  document.querySelector('.rbig').style.setProperty('--nc',col);
+  $('rNum').textContent='0';countUp($('rNum'),big||0,dec,RM?1:1000);
+  $('rRec').innerHTML=rec?'<span class="rec">NOVO RECORDE!</span>':'';
+  $('rA').textContent=right+'/'+answered;$('rS').textContent=String(bestRun);
+  $('rP').textContent=mode==='test'?('+'+xpGain+' XP'):String(score);
+  $('rP').nextElementSibling.textContent=mode==='test'?'XP ganho':'Pontos';
+  $('rG').textContent=S.total?fmt(S.correct/S.total*10):'–';
+  var rv=$('rev');rv.innerHTML='';
+  missed.slice(0,20).forEach(function(m){
+    var li=document.createElement('li'),b=document.createElement('b'),s=document.createElement('span');
+    b.textContent=m.q;s.textContent='✓ '+m.a;li.appendChild(b);li.appendChild(s);rv.appendChild(li);
+  });
+  $('revWrap').hidden=!missed.length;
+  document.documentElement.style.setProperty('--heat','0');
+  show('result');
+  var great=(mode==='test'&&nota>=7)||rec||(mode!=='test'&&right>=8);
+  if(great){sfx.win();rain(140);burst(W/2,H*.4,90,Math.PI*2,15)}
+  else if(mode==='turbo'&&lives<=0){sfx.over()}
+  else{sfx.ok(2)}
+  var lvNow=levelInfo(S.xp).lvl;
+  if(lvNow>lvStart){setTimeout(function(){pop('NÍVEL '+lvNow+'!','var(--cyan)');sfx.level()},700)}
+}
+
+/* ---------- WIRING ---------- */
+Array.prototype.forEach.call(document.querySelectorAll('.mode'),function(b){b.addEventListener('click',function(){start(b.dataset.mode)})});
+$('again').addEventListener('click',function(){start(mode)});
+$('toHome').addEventListener('click',function(){renderHome();show('home')});
+$('soundBtn').addEventListener('click',function(){ensureAudio();S.sound=!S.sound;save();renderHome();if(S.sound)sfx.start()});
+$('quit').addEventListener('click',function(){
+  var q=$('quit');
+  if(q.dataset.armed==='1'){
+    clearTimeout(quitT);q.dataset.armed='0';clearInterval(timer);clearTimeout(autoT);waitNext=false;locked=true;
+    if(mode==='inf'&&answered>0){finish()}else{renderHome();show('home')}
+    return;
+  }
+  q.dataset.armed='1';q.textContent='Tem certeza?';
+  quitT=setTimeout(function(){q.dataset.armed='0';q.textContent=mode==='inf'?'Encerrar':'Sair'},2500);
+});
+var rs=0,rsT=0;
+$('resetBtn').addEventListener('click',function(){
+  var b=$('resetBtn');
+  if(b.dataset.armed==='1'){clearTimeout(rsT);b.dataset.armed='0';b.textContent='Zerar tudo';var snd=S.sound;S=defStats();S.sound=snd;save();renderHome();return}
+  b.dataset.armed='1';b.textContent='Toque de novo para apagar nota, XP e recordes';
+  rsT=setTimeout(function(){b.dataset.armed='0';b.textContent='Zerar tudo'},3000);
+});
+document.addEventListener('keydown',function(e){
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  if($('game').hidden)return;
+  if(e.target&&e.target.tagName==='INPUT')return;
+  var k=e.key,idx=-1;
+  if(k>='1'&&k<='4')idx=Number(k)-1;
+  else if(/^[a-dA-D]$/.test(k))idx=k.toLowerCase().charCodeAt(0)-97;
+  if(idx>=0&&!locked){e.preventDefault();answer(idx);return}
+  if((k==='Enter'||k===' ')&&waitNext&&document.activeElement!==$('nextBtn')){e.preventDefault();goNext()}
+});
+
+renderHome();show('home');
+})();
+</script>
+
+</body></html>
